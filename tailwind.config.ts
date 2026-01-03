@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        cloud: {
+          dark: "hsl(var(--cloud-dark))",
+          medium: "hsl(var(--cloud-medium))",
+          light: "hsl(var(--cloud-light))",
+        },
+        cyber: {
+          teal: "hsl(var(--cyber-teal))",
+          blue: "hsl(var(--cyber-blue))",
+        },
+      },
+      fontFamily: {
+        display: ["'Space Grotesk'", "sans-serif"],
+        sans: ["'Inter'", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
