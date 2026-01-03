@@ -1,5 +1,14 @@
 import CloudNetwork from "./CloudNetwork";
 import CloudIcon from "./CloudIcon";
+import { 
+  LambdaIcon, 
+  KubernetesIcon, 
+  TerraformIcon, 
+  DockerIcon, 
+  CloudFormationIcon,
+  PulumiIcon,
+  GitLabIcon
+} from "./TechIcons";
 
 const LinkedInCover = () => {
   return (
@@ -22,27 +31,64 @@ const LinkedInCover = () => {
       {/* Animated network canvas */}
       <CloudNetwork />
 
-      {/* Floating cloud icons */}
-      <div className="absolute top-[15%] left-[8%] animate-float opacity-40">
-        <CloudIcon type="cloud" size={48} />
+      {/* Floating Lucide icons */}
+      <div className="absolute top-[15%] left-[5%] animate-float opacity-40">
+        <CloudIcon type="cloud" size={44} />
       </div>
-      <div className="absolute top-[25%] right-[12%] animate-float-delay opacity-30">
-        <CloudIcon type="server" size={40} />
+      <div className="absolute top-[60%] right-[8%] animate-float-delay opacity-30">
+        <CloudIcon type="server" size={36} />
       </div>
-      <div className="absolute bottom-[20%] left-[15%] animate-float-delay opacity-35">
-        <CloudIcon type="database" size={36} />
+      <div className="absolute bottom-[15%] left-[12%] animate-float-delay opacity-35">
+        <CloudIcon type="database" size={32} />
       </div>
-      <div className="absolute top-[35%] left-[30%] animate-float opacity-25">
-        <CloudIcon type="shield" size={32} />
+      <div className="absolute top-[25%] right-[25%] animate-float opacity-25">
+        <CloudIcon type="shield" size={28} />
       </div>
-      <div className="absolute bottom-[30%] right-[20%] animate-float opacity-30">
-        <CloudIcon type="cpu" size={38} />
+
+      {/* Tech brand icons - Left side */}
+      <div className="absolute top-[20%] left-[18%] animate-float opacity-50">
+        <div className="relative">
+          <div className="absolute inset-0 blur-lg opacity-50 bg-primary rounded-full scale-150" />
+          <TerraformIcon size={38} className="relative text-primary drop-shadow-lg" />
+        </div>
       </div>
-      <div className="absolute top-[20%] right-[35%] animate-float-delay opacity-25">
-        <CloudIcon type="git" size={30} />
+      <div className="absolute bottom-[25%] left-[8%] animate-float-delay opacity-45">
+        <div className="relative">
+          <div className="absolute inset-0 blur-lg opacity-40 bg-accent rounded-full scale-150" />
+          <KubernetesIcon size={42} className="relative text-accent drop-shadow-lg" />
+        </div>
       </div>
-      <div className="absolute bottom-[25%] right-[40%] animate-float opacity-20">
-        <CloudIcon type="zap" size={28} />
+      <div className="absolute top-[55%] left-[22%] animate-float opacity-35">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-40 bg-primary rounded-full scale-125" />
+          <LambdaIcon size={30} className="relative text-primary drop-shadow-lg" />
+        </div>
+      </div>
+
+      {/* Tech brand icons - Right side */}
+      <div className="absolute top-[15%] right-[15%] animate-float-delay opacity-45">
+        <div className="relative">
+          <div className="absolute inset-0 blur-lg opacity-50 bg-accent rounded-full scale-150" />
+          <DockerIcon size={40} className="relative text-accent drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute bottom-[20%] right-[18%] animate-float opacity-40">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-40 bg-primary rounded-full scale-125" />
+          <CloudFormationIcon size={36} className="relative text-primary drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute top-[45%] right-[10%] animate-float-delay opacity-35">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-40 bg-accent rounded-full scale-125" />
+          <PulumiIcon size={28} className="relative text-accent drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute bottom-[40%] right-[28%] animate-float opacity-30">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-30 bg-primary rounded-full scale-125" />
+          <GitLabIcon size={26} className="relative text-primary drop-shadow-lg" />
+        </div>
       </div>
 
       {/* Main glow orbs */}
