@@ -7,7 +7,8 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
+  :root,
+  .theme-default {
     --background: 215 28% 17%;
     --foreground: 210 40% 98%;
 
@@ -54,6 +55,117 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 215 25% 30%;
     --sidebar-ring: 174 100% 42%;
+  }
+
+  /* AWS Theme - Orange/Smile */
+  .theme-aws {
+    --background: 220 20% 14%;
+    --foreground: 40 20% 98%;
+
+    --card: 220 22% 18%;
+    --card-foreground: 40 20% 98%;
+
+    --popover: 220 22% 18%;
+    --popover-foreground: 40 20% 98%;
+
+    --primary: 33 100% 50%;
+    --primary-foreground: 220 20% 10%;
+
+    --secondary: 220 22% 22%;
+    --secondary-foreground: 40 20% 98%;
+
+    --muted: 220 18% 25%;
+    --muted-foreground: 40 15% 65%;
+
+    --accent: 45 100% 51%;
+    --accent-foreground: 220 20% 10%;
+
+    --border: 220 18% 28%;
+    --input: 220 18% 28%;
+    --ring: 33 100% 50%;
+
+    --cloud-dark: 220 20% 10%;
+    --cloud-medium: 220 20% 16%;
+    --cloud-light: 220 18% 30%;
+    --cyber-teal: 33 100% 50%;
+    --cyber-blue: 45 100% 51%;
+    --neon-glow: 33 100% 55%;
+  }
+
+  /* Azure Theme - Blue */
+  .theme-azure {
+    --background: 215 35% 12%;
+    --foreground: 210 40% 98%;
+
+    --card: 215 38% 16%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 38% 16%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 206 100% 50%;
+    --primary-foreground: 215 35% 8%;
+
+    --secondary: 215 35% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 215 30% 24%;
+    --muted-foreground: 210 20% 68%;
+
+    --accent: 190 100% 45%;
+    --accent-foreground: 215 35% 8%;
+
+    --border: 215 28% 26%;
+    --input: 215 28% 26%;
+    --ring: 206 100% 50%;
+
+    --cloud-dark: 215 35% 8%;
+    --cloud-medium: 215 35% 14%;
+    --cloud-light: 215 30% 28%;
+    --cyber-teal: 206 100% 50%;
+    --cyber-blue: 190 100% 45%;
+    --neon-glow: 206 100% 55%;
+  }
+
+  /* GCP Theme - Multi-color */
+  .theme-gcp {
+    --background: 220 15% 13%;
+    --foreground: 210 30% 98%;
+
+    --card: 220 18% 17%;
+    --card-foreground: 210 30% 98%;
+
+    --popover: 220 18% 17%;
+    --popover-foreground: 210 30% 98%;
+
+    --primary: 217 89% 61%;
+    --primary-foreground: 220 15% 8%;
+
+    --secondary: 220 18% 22%;
+    --secondary-foreground: 210 30% 98%;
+
+    --muted: 220 14% 25%;
+    --muted-foreground: 210 18% 65%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 220 15% 8%;
+
+    --border: 220 14% 28%;
+    --input: 220 14% 28%;
+    --ring: 217 89% 61%;
+
+    --cloud-dark: 220 15% 9%;
+    --cloud-medium: 220 15% 15%;
+    --cloud-light: 220 14% 30%;
+    --cyber-teal: 217 89% 61%;
+    --cyber-blue: 142 71% 45%;
+    --neon-glow: 217 89% 65%;
+
+    /* GCP specific accent colors */
+    --gcp-red: 4 90% 58%;
+    --gcp-yellow: 45 100% 51%;
+    --gcp-green: 142 71% 45%;
+    --gcp-blue: 217 89% 61%;
   }
 }
 
