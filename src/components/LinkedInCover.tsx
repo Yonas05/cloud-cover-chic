@@ -1,4 +1,4 @@
-import CloudNetwork from "./CloudNetwork";
+import Cover3DScene from "./Cover3DScene";
 import CloudIcon from "./CloudIcon";
 import { 
   LambdaIcon, 
@@ -28,8 +28,8 @@ const LinkedInCover = () => {
         }}
       />
 
-      {/* Animated network canvas */}
-      <CloudNetwork />
+      {/* 3D Scene */}
+      <Cover3DScene />
 
       {/* Floating Lucide icons */}
       <div className="absolute top-[15%] left-[5%] animate-float opacity-40">
@@ -95,7 +95,7 @@ const LinkedInCover = () => {
       <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-primary/10 rounded-full blur-[80px] animate-pulse-glow" />
       <div className="absolute top-1/2 right-1/4 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] bg-accent/10 rounded-full blur-[60px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
-      {/* Content overlay - centered */}
+      {/* Content overlay - centered (no name, just tagline) */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10 px-8">
         {/* Available badge */}
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-sm mb-6">
@@ -105,18 +105,10 @@ const LinkedInCover = () => {
           </span>
         </div>
 
-        {/* Name */}
-        <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-1">
-          <span className="text-foreground">Yonas Fayera</span>
-        </h1>
-        <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-          <span className="text-primary text-glow">Itana</span>
-        </h2>
-
         {/* Title */}
-        <p className="text-lg md:text-xl text-muted-foreground font-light tracking-wide mb-4">
-          Cloud Solution Architect
-        </p>
+        <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+          <span className="text-primary text-glow">Cloud Solution Architect</span>
+        </h1>
 
         {/* Skills */}
         <div className="flex items-center gap-3 text-sm md:text-base">
