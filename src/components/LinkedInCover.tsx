@@ -6,96 +6,148 @@ import {
   TerraformIcon, 
   DockerIcon, 
   CloudFormationIcon,
-  PulumiIcon,
-  GitLabIcon
+  EC2Icon,
+  S3Icon,
+  RDSIcon,
+  VPCIcon,
+  Route53Icon,
+  ELBIcon,
+  DynamoDBIcon,
+  ECSIcon,
+  EKSIcon,
+  APIGatewayIcon,
 } from "./TechIcons";
 
 const LinkedInCover = () => {
   return (
     <div className="relative w-full aspect-[4/1] bg-background overflow-hidden rounded-lg border border-border/50">
-      {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cloud-dark via-background to-cloud-medium" />
+      {/* Dark gradient background matching reference */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% 40%, hsl(180 80% 20% / 0.15) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 50% 50%, hsl(180 100% 30% / 0.1) 0%, transparent 50%),
+            linear-gradient(180deg, hsl(200 30% 8%) 0%, hsl(200 25% 6%) 50%, hsl(200 30% 10%) 100%)
+          `
+        }}
+      />
       
       {/* Subtle grid pattern */}
       <div 
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(0, 209, 178, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 209, 178, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(0, 212, 170, 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 212, 170, 0.3) 1px, transparent 1px)
           `,
-          backgroundSize: "60px 60px",
+          backgroundSize: "80px 80px",
         }}
       />
 
       {/* 3D Scene */}
       <Cover3DScene />
 
-      {/* Floating Lucide icons */}
-      <div className="absolute top-[15%] left-[5%] animate-float opacity-40">
-        <CloudIcon type="cloud" size={44} />
+      {/* AWS Service Icons - Left side */}
+      <div className="absolute top-[12%] left-[4%] animate-float opacity-60">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-40 bg-primary rounded-full scale-150" />
+          <EC2Icon size={28} className="relative text-primary drop-shadow-lg" />
+        </div>
       </div>
-      <div className="absolute top-[60%] right-[8%] animate-float-delay opacity-30">
-        <CloudIcon type="server" size={36} />
+      <div className="absolute top-[35%] left-[6%] animate-float-delay opacity-50">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-30 bg-accent rounded-full scale-150" />
+          <S3Icon size={26} className="relative text-accent drop-shadow-lg" />
+        </div>
       </div>
-      <div className="absolute bottom-[15%] left-[12%] animate-float-delay opacity-35">
-        <CloudIcon type="database" size={32} />
+      <div className="absolute bottom-[30%] left-[3%] animate-float opacity-55">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-35 bg-primary rounded-full scale-125" />
+          <LambdaIcon size={24} className="relative text-primary drop-shadow-lg" />
+        </div>
       </div>
-      <div className="absolute top-[25%] right-[25%] animate-float opacity-25">
-        <CloudIcon type="shield" size={28} />
+      <div className="absolute bottom-[12%] left-[8%] animate-float-delay opacity-45">
+        <div className="relative">
+          <div className="absolute inset-0 blur-md opacity-30 bg-accent rounded-full scale-125" />
+          <RDSIcon size={22} className="relative text-accent drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute top-[55%] left-[15%] animate-float opacity-40">
+        <div className="relative">
+          <div className="absolute inset-0 blur-sm opacity-30 bg-primary rounded-full scale-125" />
+          <VPCIcon size={20} className="relative text-primary drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute top-[20%] left-[12%] animate-float-delay opacity-45">
+        <div className="relative">
+          <div className="absolute inset-0 blur-sm opacity-25 bg-accent rounded-full scale-125" />
+          <ECSIcon size={22} className="relative text-accent drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute bottom-[45%] left-[18%] animate-float opacity-35">
+        <div className="relative">
+          <div className="absolute inset-0 blur-sm opacity-25 bg-primary rounded-full scale-125" />
+          <DynamoDBIcon size={20} className="relative text-primary drop-shadow-lg" />
+        </div>
       </div>
 
-      {/* Tech brand icons - Left side */}
-      <div className="absolute top-[20%] left-[18%] animate-float opacity-50">
+      {/* AWS Service Icons - Right side */}
+      <div className="absolute top-[15%] right-[5%] animate-float-delay opacity-55">
         <div className="relative">
-          <div className="absolute inset-0 blur-lg opacity-50 bg-primary rounded-full scale-150" />
-          <TerraformIcon size={38} className="relative text-primary drop-shadow-lg" />
+          <div className="absolute inset-0 blur-md opacity-40 bg-accent rounded-full scale-150" />
+          <DockerIcon size={28} className="relative text-accent drop-shadow-lg" />
         </div>
       </div>
-      <div className="absolute bottom-[25%] left-[8%] animate-float-delay opacity-45">
+      <div className="absolute top-[40%] right-[3%] animate-float opacity-50">
         <div className="relative">
-          <div className="absolute inset-0 blur-lg opacity-40 bg-accent rounded-full scale-150" />
-          <KubernetesIcon size={42} className="relative text-accent drop-shadow-lg" />
+          <div className="absolute inset-0 blur-md opacity-35 bg-primary rounded-full scale-125" />
+          <KubernetesIcon size={26} className="relative text-primary drop-shadow-lg" />
         </div>
       </div>
-      <div className="absolute top-[55%] left-[22%] animate-float opacity-35">
+      <div className="absolute bottom-[25%] right-[6%] animate-float-delay opacity-45">
         <div className="relative">
-          <div className="absolute inset-0 blur-md opacity-40 bg-primary rounded-full scale-125" />
-          <LambdaIcon size={30} className="relative text-primary drop-shadow-lg" />
+          <div className="absolute inset-0 blur-md opacity-30 bg-accent rounded-full scale-125" />
+          <TerraformIcon size={24} className="relative text-accent drop-shadow-lg" />
         </div>
       </div>
-
-      {/* Tech brand icons - Right side */}
-      <div className="absolute top-[15%] right-[15%] animate-float-delay opacity-45">
+      <div className="absolute bottom-[10%] right-[12%] animate-float opacity-40">
         <div className="relative">
-          <div className="absolute inset-0 blur-lg opacity-50 bg-accent rounded-full scale-150" />
-          <DockerIcon size={40} className="relative text-accent drop-shadow-lg" />
+          <div className="absolute inset-0 blur-sm opacity-25 bg-primary rounded-full scale-125" />
+          <CloudFormationIcon size={22} className="relative text-primary drop-shadow-lg" />
         </div>
       </div>
-      <div className="absolute bottom-[20%] right-[18%] animate-float opacity-40">
+      <div className="absolute top-[60%] right-[15%] animate-float-delay opacity-35">
         <div className="relative">
-          <div className="absolute inset-0 blur-md opacity-40 bg-primary rounded-full scale-125" />
-          <CloudFormationIcon size={36} className="relative text-primary drop-shadow-lg" />
+          <div className="absolute inset-0 blur-sm opacity-25 bg-accent rounded-full scale-125" />
+          <Route53Icon size={20} className="relative text-accent drop-shadow-lg" />
         </div>
       </div>
-      <div className="absolute top-[45%] right-[10%] animate-float-delay opacity-35">
+      <div className="absolute top-[25%] right-[10%] animate-float opacity-40">
         <div className="relative">
-          <div className="absolute inset-0 blur-md opacity-40 bg-accent rounded-full scale-125" />
-          <PulumiIcon size={28} className="relative text-accent drop-shadow-lg" />
+          <div className="absolute inset-0 blur-sm opacity-30 bg-primary rounded-full scale-125" />
+          <ELBIcon size={22} className="relative text-primary drop-shadow-lg" />
         </div>
       </div>
-      <div className="absolute bottom-[40%] right-[28%] animate-float opacity-30">
+      <div className="absolute bottom-[50%] right-[18%] animate-float-delay opacity-35">
         <div className="relative">
-          <div className="absolute inset-0 blur-md opacity-30 bg-primary rounded-full scale-125" />
-          <GitLabIcon size={26} className="relative text-primary drop-shadow-lg" />
+          <div className="absolute inset-0 blur-sm opacity-20 bg-accent rounded-full scale-125" />
+          <EKSIcon size={20} className="relative text-accent drop-shadow-lg" />
+        </div>
+      </div>
+      <div className="absolute top-[75%] right-[20%] animate-float opacity-30">
+        <div className="relative">
+          <div className="absolute inset-0 blur-sm opacity-20 bg-primary rounded-full scale-125" />
+          <APIGatewayIcon size={18} className="relative text-primary drop-shadow-lg" />
         </div>
       </div>
 
       {/* Main glow orbs */}
-      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-primary/10 rounded-full blur-[80px] animate-pulse-glow" />
-      <div className="absolute top-1/2 right-1/4 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] bg-accent/10 rounded-full blur-[60px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[200px] bg-primary/8 rounded-full blur-[100px] animate-pulse-glow" />
+      <div className="absolute top-[40%] left-[30%] -translate-x-1/2 -translate-y-1/2 w-[200px] h-[100px] bg-accent/5 rounded-full blur-[60px] animate-pulse-glow" style={{ animationDelay: "1s" }} />
+      <div className="absolute top-[40%] right-[30%] translate-x-1/2 -translate-y-1/2 w-[200px] h-[100px] bg-accent/5 rounded-full blur-[60px] animate-pulse-glow" style={{ animationDelay: "2s" }} />
 
-      {/* Content overlay - centered (no name, just tagline) */}
+      {/* Content overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10 px-8">
         {/* Available badge */}
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-sm mb-6">

@@ -1,178 +1,344 @@
 import { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, Sphere, Box, Torus, Icosahedron, Octahedron, Dodecahedron, MeshWobbleMaterial, Trail } from "@react-three/drei";
+import { Float, Sphere, Torus, Icosahedron, Octahedron } from "@react-three/drei";
 import * as THREE from "three";
 
-const InteractiveShape = ({ 
-  position, 
-  color,
-  hoverColor,
-  speed = 1, 
-  distort = 0.4,
-  size = 1,
-  type = "sphere"
-}: { 
-  position: [number, number, number]; 
-  color: string;
-  hoverColor?: string;
-  speed?: number;
-  distort?: number;
-  size?: number;
-  type?: "sphere" | "box" | "torus" | "icosahedron" | "octahedron" | "dodecahedron";
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-  const [clicked, setClicked] = useState(false);
-  const targetScale = useRef(1);
+// Central cloud shape made of particles
+const CloudShape = () => {
+  const points = useRef<THREE.Points>(null);
+  const { positions, opacities } = useMemo(() => {
+    const count = 800;
+    const positions = new Float32Array(count * 3);
+    const opacities = new Float32Array(count);
+    
+    for (let i = 0; i < count; i++) {
+      // Create cloud-like distribution
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 1.5 + Math.random() * 0.8;
+      
+      // Flatten vertically for cloud shape
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta) * 1.3;
+      positions[i * 3 + 1] = r * Math.cos(phi) * 0.5;
+      positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+      
+      opacities[i] = 0.3 + Math.random() * 0.7;
+    }
+    return { positions, opacities };
+  }, []);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2 * speed;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3 * speed;
-      
-      // Smooth scale animation on hover
-      targetScale.current = hovered ? 1.4 : clicked ? 1.2 : 1;
-      meshRef.current.scale.lerp(
-        new THREE.Vector3(targetScale.current, targetScale.current, targetScale.current),
-        0.1
-      );
+    if (points.current) {
+      points.current.rotation.y = state.clock.elapsedTime * 0.05;
     }
   });
 
-  const activeColor = hovered ? (hoverColor || color) : color;
-  const activeDistort = hovered ? distort * 1.5 : distort;
+  return (
+    <points ref={points} position={[0, 0.5, -2]}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial size={0.04} color="#00d4aa" transparent opacity={0.6} sizeAttenuation />
+    </points>
+  );
+};
 
-  const shapeProps = {
-    ref: meshRef,
-    onPointerOver: () => setHovered(true),
-    onPointerOut: () => setHovered(false),
-    onClick: () => setClicked(!clicked),
-  };
+// Single network line component
+const NetworkLine = ({ start, end }: { start: THREE.Vector3; end: THREE.Vector3 }) => {
+  const lineRef = useRef<THREE.Line>(null);
+  
+  const { geometry } = useMemo(() => {
+    const curve = new THREE.QuadraticBezierCurve3(
+      start,
+      new THREE.Vector3(
+        (start.x + end.x) / 2,
+        (start.y + end.y) / 2 + 0.5,
+        (start.z + end.z) / 2
+      ),
+      end
+    );
+    const points = curve.getPoints(30);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    return { geometry };
+  }, [start, end]);
 
-  const materialProps = {
-    color: activeColor,
-    distort: activeDistort,
-    speed: hovered ? 4 : 2,
-    roughness: 0.1,
-    metalness: 0.9,
-    emissive: activeColor,
-    emissiveIntensity: hovered ? 0.3 : 0.1,
-  };
+  useFrame((state) => {
+    if (lineRef.current) {
+      const material = lineRef.current.material as THREE.LineBasicMaterial;
+      material.opacity = 0.15 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+    }
+  });
+
+  return (
+    <primitive object={new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: "#00d4aa", transparent: true, opacity: 0.2 }))} ref={lineRef} />
+  );
+};
+
+// Network connection lines
+const NetworkLines = () => {
+  const linesRef = useRef<THREE.Group>(null);
+  
+  const connections = useMemo(() => {
+    const nodes: [number, number, number][] = [
+      // Center cloud
+      [0, 0.5, -2],
+      // Outer nodes - screens/servers positions
+      [-5.5, 1.5, -1],
+      [-6, -0.5, 0],
+      [-4, -1.5, -0.5],
+      [-3, 1, -1.5],
+      [5.5, 1.5, -1],
+      [6, -0.5, 0],
+      [4, -1.5, -0.5],
+      [3, 1, -1.5],
+      [0, 2, -3],
+      [0, -1.5, -1],
+    ];
+    
+    const lines: { start: THREE.Vector3; end: THREE.Vector3; }[] = [];
+    
+    // Connect center to outer nodes
+    for (let i = 1; i < nodes.length; i++) {
+      lines.push({
+        start: new THREE.Vector3(...nodes[0]),
+        end: new THREE.Vector3(...nodes[i]),
+      });
+    }
+    
+    return lines;
+  }, []);
+
+  useFrame((state) => {
+    if (linesRef.current) {
+      linesRef.current.children.forEach((child, i) => {
+        if (child instanceof THREE.Line) {
+          const material = child.material as THREE.LineBasicMaterial;
+          material.opacity = 0.15 + Math.sin(state.clock.elapsedTime * 2 + i * 0.5) * 0.1;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={linesRef}>
+      {connections.map((conn, i) => (
+        <NetworkLine key={i} start={conn.start} end={conn.end} />
+      ))}
+    </group>
+  );
+};
+
+// Floating data packets along network lines
+const DataPackets = ({ count = 20 }) => {
+  const packets = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => ({
+      startOffset: Math.random(),
+      speed: 0.3 + Math.random() * 0.4,
+      pathIndex: Math.floor(Math.random() * 10),
+    }));
+  }, [count]);
+
+  return (
+    <group>
+      {packets.map((packet, i) => (
+        <DataPacket key={i} {...packet} />
+      ))}
+    </group>
+  );
+};
+
+const DataPacket = ({ startOffset, speed, pathIndex }: { startOffset: number; speed: number; pathIndex: number }) => {
+  const ref = useRef<THREE.Mesh>(null);
+  
+  const nodes: [number, number, number][] = [
+    [0, 0.5, -2],
+    [-5.5, 1.5, -1],
+    [-6, -0.5, 0],
+    [-4, -1.5, -0.5],
+    [-3, 1, -1.5],
+    [5.5, 1.5, -1],
+    [6, -0.5, 0],
+    [4, -1.5, -0.5],
+    [3, 1, -1.5],
+    [0, 2, -3],
+    [0, -1.5, -1],
+  ];
+  
+  const endNode = nodes[(pathIndex % 10) + 1] || nodes[1];
+  const curve = useMemo(() => new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(...nodes[0]),
+    new THREE.Vector3(
+      (nodes[0][0] + endNode[0]) / 2,
+      (nodes[0][1] + endNode[1]) / 2 + 0.5,
+      (nodes[0][2] + endNode[2]) / 2
+    ),
+    new THREE.Vector3(...endNode)
+  ), [endNode]);
+
+  useFrame((state) => {
+    if (ref.current) {
+      const t = ((state.clock.elapsedTime * speed + startOffset) % 1);
+      const pos = curve.getPoint(t);
+      ref.current.position.copy(pos);
+    }
+  });
+
+  return (
+    <mesh ref={ref}>
+      <sphereGeometry args={[0.03, 8, 8]} />
+      <meshBasicMaterial color="#00ffcc" transparent opacity={0.9} />
+    </mesh>
+  );
+};
+
+// Glow rings around center
+const GlowRings = () => {
+  const ring1 = useRef<THREE.Mesh>(null);
+  const ring2 = useRef<THREE.Mesh>(null);
+  const ring3 = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (ring1.current) {
+      ring1.current.rotation.x = Math.PI / 2 + Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+      ring1.current.rotation.z = state.clock.elapsedTime * 0.1;
+    }
+    if (ring2.current) {
+      ring2.current.rotation.x = Math.PI / 2 + Math.cos(state.clock.elapsedTime * 0.25) * 0.15;
+      ring2.current.rotation.z = -state.clock.elapsedTime * 0.08;
+    }
+    if (ring3.current) {
+      ring3.current.rotation.x = Math.PI / 2 + Math.sin(state.clock.elapsedTime * 0.2) * 0.12;
+      ring3.current.rotation.z = state.clock.elapsedTime * 0.05;
+    }
+  });
+
+  return (
+    <group position={[0, 0.5, -2]}>
+      <mesh ref={ring1}>
+        <torusGeometry args={[2, 0.015, 16, 100]} />
+        <meshBasicMaterial color="#00d4aa" transparent opacity={0.4} />
+      </mesh>
+      <mesh ref={ring2}>
+        <torusGeometry args={[2.5, 0.01, 16, 100]} />
+        <meshBasicMaterial color="#00b4d8" transparent opacity={0.3} />
+      </mesh>
+      <mesh ref={ring3}>
+        <torusGeometry args={[3, 0.008, 16, 100]} />
+        <meshBasicMaterial color="#00d4aa" transparent opacity={0.2} />
+      </mesh>
+    </group>
+  );
+};
+
+// Floating geometric shapes
+const FloatingShape = ({ 
+  position, 
+  type,
+  color = "#00d4aa",
+  size = 0.5 
+}: { 
+  position: [number, number, number]; 
+  type: "octahedron" | "icosahedron" | "torus";
+  color?: string;
+  size?: number;
+}) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+    }
+  });
 
   const renderShape = () => {
+    const props = {
+      ref: meshRef,
+      onPointerOver: () => setHovered(true),
+      onPointerOut: () => setHovered(false),
+    };
+
     switch (type) {
-      case "box":
-        return <Box args={[size, size, size]} {...shapeProps}>
-          <MeshDistortMaterial {...materialProps} />
-        </Box>;
-      case "torus":
-        return <Torus args={[size * 0.7, size * 0.3, 32, 64]} {...shapeProps}>
-          <MeshDistortMaterial {...materialProps} distort={activeDistort * 0.5} />
-        </Torus>;
-      case "icosahedron":
-        return <Icosahedron args={[size * 0.8, 0]} {...shapeProps}>
-          <MeshDistortMaterial {...materialProps} />
-        </Icosahedron>;
       case "octahedron":
-        return <Octahedron args={[size * 0.8, 0]} {...shapeProps}>
-          <MeshWobbleMaterial color={activeColor} factor={hovered ? 1 : 0.4} speed={2} metalness={0.8} roughness={0.2} />
-        </Octahedron>;
-      case "dodecahedron":
-        return <Dodecahedron args={[size * 0.7, 0]} {...shapeProps}>
-          <MeshDistortMaterial {...materialProps} />
-        </Dodecahedron>;
-      default:
-        return <Sphere args={[size, 64, 64]} {...shapeProps}>
-          <MeshDistortMaterial {...materialProps} />
-        </Sphere>;
+        return (
+          <Octahedron {...props} args={[size, 0]}>
+            <meshBasicMaterial color={color} wireframe transparent opacity={hovered ? 0.8 : 0.4} />
+          </Octahedron>
+        );
+      case "icosahedron":
+        return (
+          <Icosahedron {...props} args={[size, 0]}>
+            <meshBasicMaterial color={color} wireframe transparent opacity={hovered ? 0.8 : 0.4} />
+          </Icosahedron>
+        );
+      case "torus":
+        return (
+          <Torus {...props} args={[size, size * 0.3, 8, 16]}>
+            <meshBasicMaterial color={color} wireframe transparent opacity={hovered ? 0.8 : 0.4} />
+          </Torus>
+        );
     }
   };
 
   return (
-    <Float speed={speed} rotationIntensity={hovered ? 1 : 0.5} floatIntensity={hovered ? 2 : 1}>
-      <group position={position}>
-        {/* Glow effect */}
-        {hovered && (
-          <Sphere args={[size * 1.2, 16, 16]}>
-            <meshBasicMaterial color={activeColor} transparent opacity={0.15} />
-          </Sphere>
-        )}
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+      <group position={position} scale={hovered ? 1.2 : 1}>
         {renderShape()}
       </group>
     </Float>
   );
 };
 
-const GlassShape = ({ position, size, color }: { position: [number, number, number]; size: number; color: string }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+// Server/screen nodes at edges
+const ServerNode = ({ position }: { position: [number, number, number] }) => {
   const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.1;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.15;
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.2;
-    }
-  });
-
+  
   return (
-    <Float speed={0.5} floatIntensity={0.5}>
-      <mesh 
-        ref={meshRef} 
+    <Float speed={1.5} floatIntensity={0.5}>
+      <group 
         position={position}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
-        scale={hovered ? 1.3 : 1}
+        scale={hovered ? 1.15 : 1}
       >
-        <torusKnotGeometry args={[size, size * 0.3, 128, 16]} />
-        <meshPhysicalMaterial 
-          color={color}
-          transmission={0.9}
-          thickness={0.5}
-          roughness={0.1}
-          metalness={0}
-          ior={1.5}
-          transparent
-          opacity={0.8}
-          emissive={color}
-          emissiveIntensity={hovered ? 0.5 : 0.1}
-        />
-      </mesh>
+        {/* Server frame */}
+        <mesh>
+          <boxGeometry args={[0.8, 0.5, 0.05]} />
+          <meshBasicMaterial color="#1a3a4a" transparent opacity={0.9} />
+        </mesh>
+        {/* Screen glow */}
+        <mesh position={[0, 0, 0.03]}>
+          <planeGeometry args={[0.7, 0.4]} />
+          <meshBasicMaterial color="#00d4aa" transparent opacity={hovered ? 0.4 : 0.2} />
+        </mesh>
+        {/* Border */}
+        <mesh>
+          <boxGeometry args={[0.82, 0.52, 0.02]} />
+          <meshBasicMaterial color="#00d4aa" transparent opacity={0.3} wireframe />
+        </mesh>
+      </group>
     </Float>
   );
 };
 
-const Particles = ({ count = 500 }) => {
+// Background particles
+const BackgroundParticles = ({ count = 400 }) => {
   const points = useRef<THREE.Points>(null);
   
-  const { positions, colors } = useMemo(() => {
+  const positions = useMemo(() => {
     const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const colorPalette = [
-      new THREE.Color("#00d1b2"),
-      new THREE.Color("#00b4d8"),
-      new THREE.Color("#7c3aed"),
-      new THREE.Color("#ff6b35"),
-      new THREE.Color("#f472b6"),
-    ];
-    
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 25;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
-      
-      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
+      positions[i * 3] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 3;
     }
-    return { positions, colors };
+    return positions;
   }, [count]);
 
   useFrame((state) => {
     if (points.current) {
-      points.current.rotation.y = state.clock.elapsedTime * 0.015;
-      points.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.05;
+      points.current.rotation.y = state.clock.elapsedTime * 0.01;
     }
   });
 
@@ -180,147 +346,49 @@ const Particles = ({ count = 500 }) => {
     <points ref={points}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
-        <bufferAttribute attach="attributes-color" count={count} array={colors} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.04} vertexColors transparent opacity={0.8} sizeAttenuation />
+      <pointsMaterial size={0.02} color="#00d4aa" transparent opacity={0.5} sizeAttenuation />
     </points>
   );
 };
 
-const GlowRing = ({ radius, color, speed = 1, thickness = 0.02 }: { radius: number; color: string; speed?: number; thickness?: number }) => {
-  const ringRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.z = state.clock.elapsedTime * 0.1 * speed;
-      ringRef.current.rotation.x = Math.PI / 2 + Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
-    }
-  });
-
-  return (
-    <mesh 
-      ref={ringRef} 
-      position={[0, 0, -3]}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-    >
-      <torusGeometry args={[radius, hovered ? thickness * 2 : thickness, 16, 100]} />
-      <meshBasicMaterial color={color} transparent opacity={hovered ? 0.8 : 0.4} />
-    </mesh>
-  );
-};
-
-const FloatingOrb = ({ position, color, size }: { position: [number, number, number]; color: string; size: number }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.3;
-    }
-  });
-
-  return (
-    <mesh 
-      ref={meshRef} 
-      position={position}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-      scale={hovered ? 1.5 : 1}
-    >
-      <sphereGeometry args={[size, 32, 32]} />
-      <meshBasicMaterial color={color} transparent opacity={hovered ? 0.9 : 0.6} />
-      {/* Outer glow */}
-      <mesh scale={1.5}>
-        <sphereGeometry args={[size, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.2} />
-      </mesh>
-    </mesh>
-  );
-};
-
-const DataStream = ({ start, end, color }: { start: [number, number, number]; end: [number, number, number]; color: string }) => {
-  const ref = useRef<THREE.Mesh>(null);
-  const progress = useRef(0);
-
-  useFrame((state, delta) => {
-    if (ref.current) {
-      progress.current = (progress.current + delta * 0.5) % 1;
-      const t = progress.current;
-      ref.current.position.set(
-        start[0] + (end[0] - start[0]) * t,
-        start[1] + (end[1] - start[1]) * t + Math.sin(t * Math.PI * 4) * 0.2,
-        start[2] + (end[2] - start[2]) * t
-      );
-    }
-  });
-
-  return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.05, 8, 8]} />
-      <meshBasicMaterial color={color} />
-    </mesh>
-  );
-};
-
 const Scene = () => {
-  const { viewport } = useThree();
-
   return (
     <>
-      {/* Enhanced lighting */}
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} color="#00d1b2" />
-      <pointLight position={[-10, -10, -10]} intensity={0.8} color="#00b4d8" />
-      <pointLight position={[0, 5, 5]} intensity={1} color="#7c3aed" />
-      <spotLight position={[0, 10, 5]} angle={0.3} penumbra={1} intensity={2} color="#ffffff" castShadow />
-      <spotLight position={[-5, 5, 5]} angle={0.4} penumbra={0.5} intensity={1} color="#ff6b35" />
+      {/* Minimal lighting */}
+      <ambientLight intensity={0.3} />
+      <pointLight position={[0, 5, 5]} intensity={0.5} color="#00d4aa" />
 
-      {/* Main interactive shapes - Left side */}
-      <InteractiveShape position={[-6, 0.5, -1]} color="#00d1b2" hoverColor="#00ffcc" size={0.7} distort={0.5} type="sphere" />
-      <InteractiveShape position={[-4.5, -1, 0]} color="#ff6b35" hoverColor="#ff9966" size={0.5} distort={0.3} type="box" speed={0.8} />
-      <InteractiveShape position={[-5.5, 1.5, -2]} color="#7c3aed" hoverColor="#a855f7" size={0.4} distort={0.4} type="octahedron" speed={0.6} />
-      <InteractiveShape position={[-3.5, -0.5, -1.5]} color="#f472b6" hoverColor="#fb7185" size={0.35} distort={0.5} type="dodecahedron" speed={1.1} />
+      {/* Central cloud */}
+      <CloudShape />
+      
+      {/* Network connections */}
+      <NetworkLines />
+      <DataPackets count={25} />
+      
+      {/* Glow rings */}
+      <GlowRings />
 
-      {/* Main interactive shapes - Right side */}
-      <InteractiveShape position={[6, -0.3, -1]} color="#00b4d8" hoverColor="#22d3ee" size={0.6} distort={0.4} type="icosahedron" />
-      <InteractiveShape position={[4.5, 1, -1.5]} color="#7c3aed" hoverColor="#a855f7" size={0.45} distort={0.4} type="torus" speed={1.2} />
-      <InteractiveShape position={[5.5, -1.5, -2]} color="#00d1b2" hoverColor="#00ffcc" size={0.35} distort={0.5} type="sphere" speed={0.9} />
-      <InteractiveShape position={[3.5, 0.5, -1]} color="#ff6b35" hoverColor="#ff9966" size={0.4} distort={0.3} type="box" speed={0.7} />
+      {/* Server nodes around the edges */}
+      <ServerNode position={[-5.5, 1.5, -1]} />
+      <ServerNode position={[-6, -0.5, 0]} />
+      <ServerNode position={[-4, -1.5, -0.5]} />
+      <ServerNode position={[5.5, 1.5, -1]} />
+      <ServerNode position={[6, -0.5, 0]} />
+      <ServerNode position={[4, -1.5, -0.5]} />
+      <ServerNode position={[0, 2, -3]} />
 
-      {/* Background shapes */}
-      <InteractiveShape position={[-7, 1.5, -4]} color="#00d1b2" hoverColor="#00ffcc" size={0.3} distort={0.6} type="sphere" speed={0.5} />
-      <InteractiveShape position={[7, -1.5, -3]} color="#00b4d8" hoverColor="#22d3ee" size={0.35} distort={0.5} type="icosahedron" speed={0.8} />
-      <InteractiveShape position={[0, 2, -5]} color="#ff6b35" hoverColor="#ff9966" size={0.4} distort={0.3} type="dodecahedron" speed={0.6} />
-      <InteractiveShape position={[-2, -1.8, -3]} color="#f472b6" hoverColor="#fb7185" size={0.3} distort={0.4} type="octahedron" speed={0.9} />
-      <InteractiveShape position={[2, -1.5, -4]} color="#7c3aed" hoverColor="#a855f7" size={0.25} distort={0.5} type="torus" speed={1} />
+      {/* Floating geometric shapes */}
+      <FloatingShape position={[-7, 0, 0]} type="octahedron" color="#00d4aa" size={0.4} />
+      <FloatingShape position={[7, -1, 0]} type="octahedron" color="#00b4d8" size={0.35} />
+      <FloatingShape position={[-6.5, -2, -1]} type="icosahedron" color="#00d4aa" size={0.3} />
+      <FloatingShape position={[6.5, 1.8, -1]} type="icosahedron" color="#00d4aa" size={0.25} />
+      <FloatingShape position={[-3, 2.2, -2]} type="torus" color="#00b4d8" size={0.2} />
+      <FloatingShape position={[3, -2, -1.5]} type="torus" color="#00d4aa" size={0.25} />
+      <FloatingShape position={[0, -2.5, -1]} type="octahedron" color="#00b4d8" size={0.3} />
 
-      {/* Glass shapes for extra flair */}
-      <GlassShape position={[-2, 0.8, -2]} size={0.25} color="#00d1b2" />
-      <GlassShape position={[2.5, -0.5, -2.5]} size={0.2} color="#7c3aed" />
-
-      {/* Floating orbs */}
-      <FloatingOrb position={[-7.5, 0, -1]} color="#00d1b2" size={0.15} />
-      <FloatingOrb position={[7.5, 0.5, -1.5]} color="#00b4d8" size={0.12} />
-      <FloatingOrb position={[-6, -1.8, -0.5]} color="#ff6b35" size={0.1} />
-      <FloatingOrb position={[6, 1.8, -0.5]} color="#7c3aed" size={0.1} />
-      <FloatingOrb position={[0, -2, -2]} color="#f472b6" size={0.08} />
-
-      {/* Data streams connecting shapes */}
-      <DataStream start={[-6, 0.5, -1]} end={[-4.5, -1, 0]} color="#00d1b2" />
-      <DataStream start={[6, -0.3, -1]} end={[4.5, 1, -1.5]} color="#00b4d8" />
-      <DataStream start={[-3.5, -0.5, -1.5]} end={[3.5, 0.5, -1]} color="#7c3aed" />
-
-      {/* Enhanced glow rings */}
-      <GlowRing radius={2.5} color="#00d1b2" speed={1} thickness={0.03} />
-      <GlowRing radius={3.5} color="#00b4d8" speed={-0.7} thickness={0.025} />
-      <GlowRing radius={4.5} color="#7c3aed" speed={0.5} thickness={0.02} />
-      <GlowRing radius={5.5} color="#ff6b35" speed={-0.3} thickness={0.015} />
-      <GlowRing radius={6.5} color="#f472b6" speed={0.4} thickness={0.01} />
-
-      {/* Enhanced particles */}
-      <Particles count={600} />
+      {/* Background particles */}
+      <BackgroundParticles count={500} />
     </>
   );
 };
